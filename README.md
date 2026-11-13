@@ -47,3 +47,9 @@ npx playwright show-report                # звіт останнього зап
 
 Запустити вручну: вкладка **Actions** → **Playwright Tests** → **Run workflow**.
 Звіт можна завантажити внизу сторінки запуску, у розділі **Artifacts** (`playwright-report`).
+
+Кнопка **Run workflow** доступна лише тим, хто має доступ на запис до репозиторію. Щоб запустити тести у своєму GitHub:
+
+1. Натисніть **Fork** угорі сторінки репозиторію і створіть копію.
+2. У своїй копії відкрийте вкладку **Actions** і натисніть **I understand my workflows, go ahead and enable them**.
+3. Виберіть **Playwright Tests** → **Run workflow**.
