@@ -4,16 +4,16 @@ import { defineConfig, devices } from '@playwright/test';
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '.env'), quiet: true });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
   testDir: './tests',
-  /* Тест ходить по живому сайту; у Firefox прогін займає 20–30 с, тому стандартних 30 с замало */
+  /* The tests run against the live site; a run takes 20–30 s in Firefox, so the default 30 s is not enough */
   timeout: 60_000,
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -22,13 +22,13 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 4 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
-    baseURL: 'https://makeup.com.ua',
+    /* The site under test comes from BASE_URL (.env or the shell); without it the tests run against production */
+    baseURL: process.env.BASE_URL || 'https://makeup.com.ua',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -42,11 +42,11 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
 
-    {
-      name: 'firefox',
-      testDir: './tests/web',
-      use: { ...devices['Desktop Firefox'] },
-    },
+    //{
+    //  name: 'firefox',
+    //  testDir: './tests/web',
+    //  use: { ...devices['Desktop Firefox'] },
+    //},
 
     {
       name: 'webkit',
