@@ -56,8 +56,8 @@ test.describe('Price Filter Tests', () => {
     // The last pagination button shows the number of pages. When all products fit one page, there is no pagination
     const lastPageText = await categoryPage.lastPageButton.allInnerTexts();
     const totalPages = Number(lastPageText[0] ?? 1);
-    // Page 1 is checked above. Cheap ranges can have 30+ pages, so at most 5 pages are checked
-    for (let pageNumber = 2; pageNumber <= Math.min(totalPages, 5); pageNumber++) {
+    // Page 1 is checked above. Cheap ranges can have 30+ pages, so at most 15 pages are checked
+    for (let pageNumber = 2; pageNumber <= Math.min(totalPages, 15); pageNumber++) {
       await categoryPage.goToPage(pageNumber);
       await categoryPage.expectAllPricesInRange(range);
     }

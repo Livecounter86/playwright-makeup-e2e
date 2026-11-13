@@ -18,7 +18,7 @@ export default tseslint.config(
       },
     },
     rules: {
-      // пропущений await на page.click(), waitForResponse тощо — головна причина флакі-тестів
+      // a missing await on page.click(), waitForResponse, etc. is the main cause of flaky tests
       '@typescript-eslint/no-floating-promises': 'error',
     },
   },

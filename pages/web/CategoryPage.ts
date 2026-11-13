@@ -12,38 +12,29 @@ export class CategoryPage {
   readonly sortControl: Locator;
 
   constructor(private readonly page: Page) {
-    // показує вибране сортування; клік відкриває список варіантів
     this.sortControl = page.locator('.Products__controls');
     this.priceFromInput = page.locator('.PriceSelector__field').filter({ hasText: 'Від' }).locator('input');
     this.priceToInput = page.locator('.PriceSelector__field').filter({ hasText: 'До' }).locator('input');
-    // «>» — лише картки самої сітки: всередині неї є ще каруселі з рекламними товарами
     this.productPrices = page
       .locator('.Products__cards')
       .locator('> .ProductCard__cardContainer')
       .locator('.Price__priceCurrent');
     this.activePage = page.locator('.Pagination__isActive');
-    // текст кнопки = кількість сторінок; читати після оновлення товарів, бо під час завантаження пагінація ще стара
     this.lastPageButton = page.locator('.Pagination__page').last();
   }
 
-  /** Випадкова ціна від min до max включно — щоб тести не залежали від конкретних значень. */
+  // A random price from min to max inclusive
   randomPrice(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  /**
-   * Вводить межі ціни; межу, яку не задано, не чіпає.
-   * Поля заповнюються по черзі з очікуванням відповіді: перемальовка після «Від» стирає «До», введене зарано.
-   */
   async setPriceRange({ from, to }: PriceRange) {
     if (from !== undefined) await this.fillPriceInput(this.priceFromInput, 'priceFrom', from);
     if (to !== undefined) await this.fillPriceInput(this.priceToInput, 'priceTo', to);
   }
 
-  /**
-   * У вузькому випадковому діапазоні невеликої категорії товарів може не бути.
-   * Тоді діапазон розширюється на 100 ₴ в обидва боки й застосовується знову. Повертає діапазон, який діє в результаті.
-   */
+  // A narrow random range can have no products in a small category.
+  // Then the range is widened by 100 ₴ on both sides and applied again. Returns the range that is in effect.
   async widenPriceRangeIfNoProducts({ from, to }: Required<PriceRange>) {
     if ((await this.getPrices()).length > 0) return { from, to };
     test.info().annotations.push({ type: 'range widened', description: `no products from ${from} to ${to}` });
@@ -52,7 +43,6 @@ export class CategoryPage {
     return widened;
   }
 
-  /** Фільтр застосовується, коли поле втрачає фокус. */
   private async fillPriceInput(input: Locator, param: 'priceFrom' | 'priceTo', value: number) {
     const response = waitForProductsResponse(this.page, { [param]: String(value) });
     await input.fill(String(value));
@@ -65,10 +55,7 @@ export class CategoryPage {
     return texts.map((text) => Number(text.replace(/\D/g, '')));
   }
 
-  /**
-   * Чекає, доки сітка покаже товари, і перевіряє, що ціни всіх товарів на сторінці в межах діапазону.
-   * Незадана межа не обмежує; sortedAsc: true додатково вимагає, щоб ціни йшли за зростанням.
-   */
+  // Waits until the grid shows products and checks that all product prices on the page are within the range.
   async expectAllPricesInRange({ from = 0, to = Infinity, sortedAsc = false }: PriceRange & { sortedAsc?: boolean }) {
     const message = `All product prices should be from ${from} to ${to}` + (sortedAsc ? ' and sorted ascending' : '');
     await expect
@@ -86,16 +73,10 @@ export class CategoryPage {
       .toEqual({ hasProducts: true, outOfRange: [], isSorted: true });
   }
 
-  /** Сайт іноді ігнорує клік по пагінації, тому клік повторюється, доки сторінка не стане активною. */
   async goToPage(pageNumber: number) {
-    const pageButton = this.page.locator('.Pagination__page', { hasText: new RegExp(`^${pageNumber}$`) });
-    await expect(async () => {
-      await pageButton.click();
-      await expect(this.activePage, `Page ${pageNumber} should become the active page`).toHaveText(String(pageNumber), {
-        timeout: 3_000,
-      });
-    }, `Page ${pageNumber} should open after clicking its pagination button`).toPass({ timeout: 15_000 });
-    // нова сторінка ще вантажиться: чекаємо, доки зникне «скелет», щоб не прочитати ціни попередньої
+    await this.page.locator('.Pagination__page', { hasText: new RegExp(`^${pageNumber}$`) }).click();
+    await expect(this.activePage, `Page ${pageNumber} should become the active page`).toHaveText(String(pageNumber));
+    // the new page is still loading: wait until the skeleton disappears, so the previous page's prices are not read
     await this.page.locator('.ProductSkeleton__grid').waitFor({ state: 'hidden' });
   }
 }
