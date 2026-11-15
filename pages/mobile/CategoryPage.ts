@@ -60,6 +60,12 @@ export class CategoryPage {
     await response;
   }
 
+  /** The last pagination button shows the number of pages. When all products fit one page, there is no pagination. */
+  async getTotalPages(): Promise<number> {
+    const lastPageText = await this.lastPageButton.allInnerTexts();
+    return Number(lastPageText[0] ?? 1);
+  }
+
   async getPrices(): Promise<number[]> {
     const texts = await this.productPrices.allTextContents();
     return texts.map((text) => Number(text.replace(/\D/g, '')));
