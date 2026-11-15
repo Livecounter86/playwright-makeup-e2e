@@ -37,7 +37,7 @@ test.describe('Price Filter Tests', () => {
 
     // The first page, then the last one
     await categoryPage.expectAllPricesInRange({ from: 250, to: 500, sortedAsc: true });
-    const lastPage = Number(await categoryPage.lastPageButton.innerText());
+    const lastPage = await categoryPage.getTotalPages();
     await categoryPage.goToPage(lastPage);
     await categoryPage.expectAllPricesInRange({ from: 250, to: 500, sortedAsc: true });
   });
@@ -52,13 +52,10 @@ test.describe('Price Filter Tests', () => {
       page.getByRole('button', { name: `Від ${range.from} До ${range.to}` }),
       `Applied filter tag "Від ${range.from} До ${range.to}" should be shown`,
     ).toBeVisible();
-    await categoryPage.expectAllPricesInRange(range);
-    // The last pagination button shows the number of pages. When all products fit one page, there is no pagination
-    const lastPageText = await categoryPage.lastPageButton.allInnerTexts();
-    const totalPages = Number(lastPageText[0] ?? 1);
-    // Page 1 is checked above. Cheap ranges can have 30+ pages, so at most 15 pages are checked
-    for (let pageNumber = 2; pageNumber <= Math.min(totalPages, 15); pageNumber++) {
-      await categoryPage.goToPage(pageNumber);
+    const totalPages = await categoryPage.getTotalPages();
+    // Cheap ranges can have 30+ pages: checking all of them exceeds the test timeout, so at most 15 pages are checked
+    for (let pageNumber = 1; pageNumber <= totalPages && pageNumber <= 15; pageNumber++) {
+      if (pageNumber > 1) await categoryPage.goToPage(pageNumber);
       await categoryPage.expectAllPricesInRange(range);
     }
   });
