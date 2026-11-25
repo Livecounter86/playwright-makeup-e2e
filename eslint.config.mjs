@@ -26,9 +26,5 @@ export default tseslint.config(
     files: ['tests/**/*.ts'],
     ...playwright.configs['flat/recommended'],
   },
-  {
-    files: ['tests/**/*.ts'],
-    ...playwright.configs['flat/recommended'],
-  },
   prettier,
 );

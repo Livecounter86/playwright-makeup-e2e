@@ -10,3 +10,7 @@ node_modules/
 # Local environment and editor settings
 .env
 .vscode/
+
+# Playwright MCP: local config and its screenshots/traces
+.mcp.json
+.playwright-mcp/
