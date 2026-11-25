@@ -38,7 +38,6 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testDir: './tests/web',
       use: { ...devices['Desktop Chrome'] },
     },
 
@@ -50,19 +49,18 @@ export default defineConfig({
 
     {
       name: 'webkit',
-      testDir: './tests/web',
       use: { ...devices['Desktop Safari'] },
     },
 
     /* Test against mobile viewports. */
     {
       name: 'Mobile Chrome',
-      testDir: './tests/mobile',
+      grepInvert: /@desktop-only/,
       use: { ...devices['Pixel 5'] },
     },
     {
       name: 'Mobile Safari',
-      testDir: './tests/mobile',
+      grepInvert: /@desktop-only/,
       use: { ...devices['iPhone 12'] },
     },
     /* Test against branded browsers. */
